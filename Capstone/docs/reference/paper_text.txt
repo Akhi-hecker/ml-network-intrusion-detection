@@ -1,0 +1,825 @@
+Research Article
+A Novel Framework Design of Network Intrusion Detection
+Based on Machine Learning Techniques
+ChongzhenZhang,1YanliChen,1YangMeng,2FangmingRuan
+ ,1RunzeChen,1YidanLi,1
+and Yaru Yang1
+1School of Big Data and Computer Science, Guizhou Normal University, Guiyang 550025, China
+2Department of Biomedical Engineering, School of Medicine, Tsinghua University, Beijing 100084, China
+Correspondence should be addressed to Fangming Ruan; rfm@gznu.edu.cn
+Received 27 October 2020; Revised 20 December 2020; Accepted 9 January 2021; Published 25 January 2021
+Academic Editor:
+Savio Sciancalepore
+Copyright ©2021 Chongzhen Zhang et al. *is is an open access article distributed under the Creative Commons Attribution
+License, which permits unrestricted use, distribution, and reproduction in any medium, provided the original work is
+properly cited.
+Traditionalmachinelearning-basedintrusiondetectionoftenonlyconsidersasinglealgorithmtoidentifyintrusiondata,lackof
+the ﬂexibility method, low detection rate, no handing high-dimensional data, and cannot solve these problems well. In order to
+improve the performance of intrusion detection system, a novel general intrusion detection framework was proposed in this
+paper, which consists of ﬁve parts: preprocessing module, autoencoder module, database module, classiﬁcation module, and
+feedbackmodule.*edataprocessedbythepreprocessingmodulearecompressedbytheautoencodermoduletoobtainalower-
+dimensional reconstruction feature, and the classiﬁcation result is obtained through the classiﬁcation module. Compressed
+features of each traﬃc are stored in the database module which can both provide retraining and testing for the classiﬁcation
+module and restore these features to the original traﬃc for postevent analysis and forensics. For evaluation of the framework
+performance proposed, simulation was conducted with the CICIDS2017 dataset to the real traﬃc of the network. As the ex-
+perimental results, the accuracy of binary classiﬁcation and multiclass classiﬁcation is better than previous work, and high-level
+accuracy was reached for the restored traﬃc. At the last, the possibility was discussed on applying the proposed framework to
+edge/fog networks.
+1.Introduction
+1.1. Background. In recent years, the widespread use of
+computers and networks and the emergence of new tech-
+nologies such as big data, internet of things, and cloudcomputing have prompted new threats in this moderncomplex environment; there has been a signiﬁcant increasein the number of malicious activities. *e need to protectnetworkresourcesfromcyberthreatshasbeengrowing,andthe intrusion detection system (IDS) is critical in thecybersecurity to achieve robust protection against cyber
+attackers; IDS enables us to detect, identify, and recognize
+anomalous behaviors caused by intruders in networks andcomputer systems. Machine learning (ML) methods can beusedforpredictionand classiﬁcation bylearningfeaturesinadvance. Based on training approach of the classiﬁer, IDScanbedividedintosupervisedandunsupervised;supervisedlearning learnslabeled trainingsamples asmuch aspossibleinordertobeabletopredictdataoutsidethetrainingsampleset; unsupervised learning is learning training samplesunlabel to discover the structural knowledge in the training
+sample set. Some techniques have been applied to intrusion
+detectionbyresearchers[1],forinstance,randomforest(RF)[2], support vector machine (SVM) [3], k-nearest neighbor
+(KNN) [4], or artiﬁcial neural network (ANN) [5].
+Application of the deep neural network (DNN) in the
+ﬁeld of intrusion detection has become a hot-point, andmany researchers paid much attention for the application,convolutional neuralnetwork(CNN)[6],for example,deepreinforcement learning (DRL) [7] and hybrid DNN struc-ture [8, 9]. DNN as an eﬀective method is evolved from theshallow neural network (SNN), a branch of ANN, and alsoHindawi
+Security and Communication Networks
+Volume 2021, Article ID 6610675, 15 pages
+https://doi.org/10.1155/2021/6610675
+
+the focus of deep learning research. Diﬀering from tradi-
+tional SNN with more network hierarchies, DNN hasstrongerabilitytomodelorabstractrepresentationsandcansimulate more complex models. DNN has hence great po-tential in realizing eﬀective data representation to constructuseful methods.
+Autoencoder (AE) as a model for feature extraction will
+be the focus in this study. AE is an unsupervised DNN thatlearns features in an unsupervised learning manner fromunlabeleddata.TwobasicstructuresareincludedinAE,i.e.,encoder and decoder. *e encoding layer reduces the di-mension by compressing the input data, which can reducethenumberofnodesintheoutputlayeranduseitforfeaturereduction.*edecodinglayerattemptstoobtaintheoriginaldatabydecodingtheencodeddata.Typically,thenumberofnodes in the input layer is equal to the number of nodes inthe output layer. Since the unlabeled data are used for
+training,thereconstructionerrorcanbeobtaineddirectlyby
+comparing the reconstruction output with the original in-put, and the optimal AE model is obtained by minimizingthe loss of the reconstruction output through layer-by-layertraining.
+If we add the L1 norm to the AE, constraining the
+number of nodes in each layer (most of which should be 0and only afew ofwhich should notbe 0),following thattheSparse Autoencoder (SAE) model can be obtained. *eexpressions obtained each time are as sparse as possiblebecause sparse expressions tend to be more eﬃcient thanothers.
+1.2. Problem Statement. Traditional ML-based intrusion
+detection often only considers using a single algorithm to
+identify intrusion data, which has problems such as rigidmethods, low detection rates, and high-dimensional data.How to design a good intrusion detection framework toadapt to the modern Internet environment and how to
+ﬂexibly and extensively combine diﬀerent machine learning
+technologies to solve problems are problems worth con-sidering. *is paper focuses on the design of such a generalintrusion detection framework to improve the performanceof various aspects of intrusion detection.
+DNN can achieve eﬀective representations that improve
+the classiﬁcation results of traditional supervised machinelearning algorithms. Although several approaches that relyon deep learning techniques are eﬀective, they are stilllimited by time complexity.
+Inspired by the autoencoder (AE) model, we have
+conducted some studies using the AE model in the actualapplication scenarios of IDS. AE helps to reconstruct theinput feature and transform it into a hyperspace repre-sentation associated with the input data, reduce the impactofhigh-dimensionalredundantfeatures,andreducetrainingcomplexity. We combined AE with the supervised machinelearningalgorithmtosigniﬁcantlyimprovetheperformanceof the classiﬁcation task.
+In this research, we propose a novel intrusion detection
+framework that can solve the above problems, which con-sists of ﬁve parts: preprocessing module, autoencodermodule, database module, classiﬁcation module, and feed-back module. *e preprocessed data are compressed by theSAEmodeloftheAEmoduletoobtainalower-dimensionalreconstruction feature, and the classiﬁcation result is ob-tained through the classiﬁcation module. *e compressedfeatures of each traﬃc are stored in the database of the
+databasemodule,whichwecallitfeaturelibrary.*islibrary
+can provide retraining and testing for the classiﬁcationmodule and can also restore these features to the originaltraﬃc for postevent analysis and forensics.
+1.3.KeyContributionsandPaperOrganization. Insummary,
+the paper’s main contributions are as follows:
+(1) We propose a novel intrusion detection framework
+to improve classiﬁcation capabilities. Simulta-
+neously, the retraining of the classiﬁer in the clas-siﬁcation module is realized through the databasemoduleandthefeedbackmodulesoastoensurethehigh accuracy rate of the classiﬁcation module
+continuously.
+(2) We developed a novel classiﬁcation method by
+combining SAE and RF. Our approach realizes thepotential of eﬀective representation and dimen-
+sionality reduction to improve the classiﬁcationresults for traditional ML algorithms in binary andmulticlass classiﬁcation.
+(3) We take full use of the characteristics of the SAE
+model, combined with the feature library in thedatabase module, to restore the ﬂow before com-pression, which can be used for postevent analysisand forensics.
+(4) We evaluate our proposed framework using the
+CICIDS2017datasetandgivethetrainingandtestingtimes. Compared with diﬀerent methods in the re-lated work using the same dataset, we have achievedthe best value in the binary and multiclassclassiﬁcation.
+*e remainder of the paper is organized as follows.
+Section 2 states the selection criteria for the relevant work
+and introduces these research studies. Section 3 brieﬂy
+describes the dataset used to evaluate our proposedframework and some of the preprocessing required for thesubsequent experiments. Section 3 focuses on our proposedframeworkandtheprinciplesinvolvedinit.InSection4,weevaluate the performance of our approach based on theexperimental results and compare it with some previouswork. *e application of IDS to edge/fog networks is dis-cussed in Section 5. Finally, Section 6 summarizes anddiscusses future directions.
+2.Related Work
+*epurposeofthissectionistoreviewrecentworkrelatedtothe design of intrusion detection systems. *e selectionprocess was based on certain criteria as follows:
+(1) Novel framework2 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+(2) Relevant to the CICIDS2017 dataset
+(3) Recent and relevant to the autoencoder
+2.1. Improved Algorithm. Many improved algorithms have
+been applied to intrusion detection systems to improve the
+detection capabilities, and these approaches show better
+performance than single learning methods. Elbasiony et al.
+[10] presented a hybrid detection framework based on datamining classiﬁcation and clustering techniques that used arandom forest algorithm together with a weighted k-meansalgorithm to construct a hybrid framework that choseanomalous clusters by injecting known attacks into un-certain connected data, which is evaluated on the KDD’99dataset to achieve a 98.3% detection rate. Authors in [11]presented a framework for automatic intrusion detectionthat employed the aﬃnity propagation (AP) algorithm tounderstandthebehaviorofobjectsbydynamicallyclustering
+streamdata,automaticallylabeldataandadaptingtonormal
+changes in behavior, and identifying anomalies. *e testresultsshowthatbetterresultswereachievedcomparedwiththe adaptive sequential Karhunen–Loeve method and staticAP as well as three other static anomaly detection methods.Yao et al. [12] proposed a hybrid multilevel data mining-based intrusion detection framework (HMLD), which theauthors claimed can detect both known and unknown at-tacks. *e KDDCUP99 dataset was used to evaluate theperformance of HMLD, and experimental results showedthat HMLD could achieve 96.70% accuracy. Although
+[10–12] have all achieved good results with the KDD99
+dataset, these datasets are outdated and contain not onlynormal data but also overly simple attack data, making itdiﬃcult to use these datasets to simulate today’s highlycomplex network environment. Using these algorithms toanalyze malicious traﬃc in relatively new datasets is alsodiﬃcult to achieve the desired eﬀect.
+In [13], a network attack detection method that com-
+bined stream computing with deep learning was proposed.*emethodusedslidingwindowstominefrequentpatternsto form pattern library quickly detects whether there are
+malicious behaviors in the data stream and used classiﬁ-
+cationalgorithmsbasedondeepbeliefnetworksandsupportvector machines (DBN-SVMs) to improve accuracy. *eauthors only used the data on Tuesday in the CICIDS2017dataset for 5 classiﬁcations, which cannot reﬂect the realsituation, whereas we use all the data in this dataset andmade 15 classiﬁcations.
+Min et al. [14] proposed an autoencoder-based frame-
+work for network intrusion detection. *e framework usedclusteringloss(orclassiﬁcationloss)andreconstructionlossjointly trained by the unsupervised clustering module (or
+classiﬁcation module) and autoencoder to obtain a more
+cluster-friendly feature representation for better clusteringresults.
+2.2.FocusonDataQuality. Moreover,theresearchersfound
+that the performance of intrusion detection was also de-
+pendent on the quality of the training data. *e authors in[15] eliminated irrelevant features using genetic algorithmfeatureselectiontechniquesandusingBayesiannetworksasa base classiﬁer for predicting attack types, and the methodhas 98.2653% accuracy on the NSL-KDD dataset. Gu et al.[16] obtained new transformed training data by trans-forming the original feature into a logarithm marginal
+density rate, SVM ensemble was then used to build the
+intrusion detection model, and the model was evaluated onthe NSL-KDD dataset to achieve 99.41% accuracy. *etraining complexity of SVM is highly dependent on the sizeof the dataset, requiring large amounts of memory and a lotof training time, and the method improves detection rateswithout taking time into account.
+Ahmim et al. [17] proposed three diﬀerent classiﬁer-
+based hierarchical intrusion detection systems based onreduced error pruning (REP) tree, JRip algorithm, andForestPA.*eﬁrstandsecondmethodstookthefeaturesof
+the dataset as input and classiﬁed the network traﬃc as
+attack/benign;thethirdclassiﬁer tooktheoutputoftheﬁrstclassiﬁer, second classiﬁer, and the features of the initialdataset as input. Evaluation using the CICIDS2017 datasetshowed that the model obtained 96.665% accuracy. Kumaretal.[18]usedrandomforestregressiontechniquetoselectasubset of attributes from the original set, and then the se-lected set of important features were used in the trainedclassiﬁer to solve the problem of low detection rate. Com-pared with [17, 18], our method has higher accuracy.
+Authorsin[19]usedtheconceptofself-learningtotrain
+deep neural networks to perform feature extraction by
+pretraining the network, combining raw and extracted
+features to train SAE. Nathan et al. [20] designed a stackednonsymmetric deep autoencoder for unsupervised featurelearning,usingtheRFasaclassiﬁer, whilealsoreducingthetraining time required for training. *e method was eval-uated using the benchmark KDD Cup’99 and NSL-KDDdatasets, which showed better performance in terms ofaccuracyforbinaryclassiﬁcation.*emaindrawbackofthismethodbeingthatthedimensionalityreductionmechanismdoes not considered.
+In [9], CNN and long short-term memory (LSTM)
+network extracted, respectively,the spatial featuresofsinglepacketsandthetemporalfeaturesofthedatastream,andthehybrid network extracted features from the network data toanalyze the network traﬃc. Experiment was conducted onthe CICIDS2017 dataset, and the results showed that thisapproach achieved an overall accuracy of 98.67%. As far asthe results are concerned, their 7 classiﬁcation results arelowerthanour15classiﬁcations,andtheyalsofacethesameproblem as the literature [8] mentioned in the nextsubsection.
+2.3. Features Dimensionality Reduction Approaches. Faced
+with high-dimensional and large-volume data, it has always
+been the focus of network intrusion detection research.Althoughmanyunsupervisedlearning-basedapproachesfornetwork intrusion detection have been proposed in recentyears, some of them still have limitations and problems.Predictionsfromhigh-dimensionallearninghaveredundantSecurityandCommunicationNetworks 3
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+features, thus reducing classiﬁcation accuracy in the raw
+dataset.In[21],usingSAEforfeaturelearningandsoft-maxregression for classiﬁcation evaluated models of classes 2, 5,and23usingtheNSL-KDDbenchmarkdataset,respectively.But, this result seems to be somewhat poor even undermulticlassiﬁcation with the accuracy of less than 80%.
+*e model proposed in [22] uses SAE to obtain
+reconstructed new feature representations, using SVM forclassiﬁcationandreducingthetrainingandtestingtime,andthe method was evaluated on the NSL-KDD dataset with99.416% accuracy and 99.396% accuracy for binary andmulticlassclassiﬁcation, respectively.*emethodimprovedtheSVMaccuracyandreducedthetrainingandtestingtimerequired;however,boththetimeprovidedintheirworkandthe results obtained from simulations in our experimentalenvironment are unacceptable. We focus on overall per-formance,notjusttheimprovementofclassiﬁcationresults.
+Abdulhammed et al. [23] used AE and principal com-
+ponent analysis (PCA) to reduce the feature dimensionalityof the CICIDS2017 dataset. *e low-dimensional featuresgeneratedbythetwotechniqueswerethenusedtoconstructvarious classiﬁers to detect malicious attacks. *e low-di-mensional features were then used to construct variousclassiﬁers, such as RF, Bayesian networks, linear discrimi-nant analysis (LDA), and quadratic discriminant analysis(QDA) to design IDS. *e authors converted the source IPaddress (source IP) and destination IP address (destinationIP)intointegerrepresentationstotrainthemodel;however,some of the features of the dataset (e.g., Source IP and
+Timestamp)mentionedintheliteratureabovewillmakethe
+model adapt to a speciﬁc dataset when training the modelusing the CICIDS2017 dataset; in fact, in separate experi-ments in [24] on whether to use IPs as features for training,the ﬁnal detection rate diﬀered by 3%.
+In [8], a multimodal sequential intrusion detection
+methodwithaspecialstructureforprogressivenetworkswasproposed, which composed of a multimodal deep autoen-coder (MDAE) and an LSTM. By designing the specialstructure of a hierarchical progressive network, the methodcan integrate feature information at diﬀerent levels in
+network connections and simultaneously automatically
+learn temporal information between adjacent networkconnections.LSTM isused to learnthe temporal featuresofthedatasetsothatspeciﬁctypesofattacksarecorrelatedwithtime (e.g., on a Friday morning, the attacks are all portscans), which is not true law. Models can exhibit highperformance fortest datasets, buttheresultsalwaysseem tobe reduced when analyzing actual network traﬃc.
+2.4.Novel Perspective. We are committed to developing an
+approach with high classiﬁcation performance and gener-
+alization, and some researchers are gradually starting tomake some attempts. Yin et al. [25] proposed a GAN-basedintrusion detection framework to improve the performanceand generalization of classiﬁers, which used adversarialtraining to enhance the classiﬁers and generated false labelsamples continuously using a generative model to assist theclassiﬁersinimprovingtheirdetectionperformance.MadaniandVlajic[26]studiedthecontaminationbasedonanomalydetection in the adaptive detection intrusion system, usingautoencoder reconstruction error as a metric for anomalydetection, using training time and test temporal metrics toevaluate the performance of the model, using NSL-KDDdatasets for performance evaluation, and maintaining a
+stable detection situation while reducing the contamination
+levelofthetrainingdatasettolessthan2%comparedwithaPCA-based IDS. *e two work analyze the problem from anovel perspective but are still a bit far from the practicalphase.
+3.Proposed Framework
+In this section, we will introduce the proposed frameworkand its workﬂow. *e proposed intrusion detectionframework is mainly composed of ﬁve parts: preprocessingmodule, autoencoder module, database module, classiﬁca-tion module, and feedback module; the various functionalmodules are maintained to build a powerful intrusion de-
+tection framework, which has high accuracy and low
+training complexity. *e proposed framework is shown inFigure 1, in which diﬀerent functions are represented usingdiﬀerent colored lines; the black line represents the mainprocess of thedetection function,the orange linerepresentsthe process involved in retraining, and the green line rep-resents the process of restore function, where the blue two-way arrows represents the processes that crosses with otherfunctions.
+3.1.Workﬂow. Before that,we ﬁrst describeeach module in
+the framework separately and then present the three main
+functions that the entire framework is based on thesemodules.
+(1) Preprocessingmodule: theraw traﬃccollected from
+the network is processed in a predetermined way(Section 4.2) to obtain the initial data
+(2) Autoencoder module: the module is mainly com-
+posed of an SAE model, which processes the data,removes the unimportant features in the data, andobtains the reconstructed low-dimensional features
+(3) Databasemodule:themoduleconsistsofadatabase,
+which serves as a data storage and dumps center forthe entire framework; the database is continuously
+updated and can be used for other subsequent
+operations
+(4) Classiﬁcation module: this module mainly uses su-
+pervised algorithms to classify traﬃc, determinewhether to an attack, and then whether a warning isgiven based on the results
+(5) Feedback module: this module adjusts its functions
+through the machine’s output status and alarminformation
+3.1.1.DetectionFunction. *edatacollectorcollectstheraw
+traﬃc from the network, processes it through the4 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+preprocessing module, and then extracts the features
+through autoencoder module. *is reconstructed low-di-mensional feature is used as input to the classiﬁcationmodule. It is also stored in the database module, where thetrained classiﬁer in the classiﬁcation module predicts theinput and ﬁnally outputs the results.
+3.1.2. Retraining Function. Obviously, the training data
+maynotcoverallpossiblenormalexecutionandabnormal
+behavior patterns which may change over time. We usedthe results of the evaluation metrics in the classiﬁcationmodule, the administrator’s analysis of the machineoutput for status, and alarm information to determinewhethertheclassiﬁerneedstobeupdated.Ifitisjudgedtoneed updating, the administrator gives a feedback to theclassiﬁcation module and relabels the false alarm entriesand stores it in the database; the classiﬁcation module
+retrievesthedatafromthedatabasemoduletoretrainthe
+classiﬁer and then re-evaluates the classiﬁer until thetraining is complete.
+3.1.3. Restore Function. For a successful intrusion detection
+system,itcannotonlyaccuratelyidentifypossibleintrusions
+but also provide a basis for the formulation of networksecurity strategies. We make full use of the features of the
+autoencoder model and use the features stored in the da-
+tabase module to restore the original traﬃc, which is con-venient for subsequent analysis and forensics by theadministrator.
+3.2. Sparse Autoencoder. Figure 2 gives a simple SAE
+training diagram; suppose we have N input and output
+nodes and Mhidden layer nodes, ﬁrst input
+x� (x
+1, x2,. . ., xn)tries to get an equal output
+􏽢x� (􏽢x1,􏽢x2,. . .,􏽢xn), i.e., x�􏽢x. Compress xinto a lower-
+dimensionalhiddenlayerrepresentationthatconsistsofone
+or more hidden layers a� (a1, a2,. . ., am)and then map
+the hidden representation a to the reconstructed output 􏽢x.
+*e output of the neurons in each hidden layer can becalculated byal
+i�f gli􏼐 􏼑 �f􏽘n
+j�1Wl−1ij·al−1j+bl−1i ⎛⎝ ⎞⎠, (1)
+where al
+idenotes the ithnode of the hidden layer l, and the
+dimension of the hidden layer weight matrix denotes
+W∈Rm×n, with a bias vector b∈Rm. We choose Clevert
+etal.[27]astheactivationfunction(seeequation(2))whereweαtake 1.0.
+f(z) �αez−1   􏼁 , z<0,
+z, z≥0.􏼨 (2)
+Using the back propagation algorithm to ﬁnd the best
+values of the weight matrix Wand the bias vector b, the
+function to minimize the loss is represented as follows:
+Jsparse(W, b, x, 􏽢x) �1
+2s􏽘s
+i�1‖􏽢x−x‖2+λ
+2􏽘ls−1
+l�1􏽘m
+i�1􏽘n
+j�1Wl
+ij􏼐 􏼑2
++β􏽘m
+i�1KLρ‖􏽢ρi   􏼁 .
+(3)
+*e ﬁrst term represents the average sum-of-square
+errorsforall sinputdata;thesecondtermistheweightdecay
+term, with the parameter λto control the weight in a
+particular layer to avoid overﬁtting, while lsrepresents the
+total number of layers; the last term is the sparsity penalty
+term; for KLdistance, which imposes a constraint in the
+hidden layer to maintain a low average activation value, thevalue ofbcontrols the weight of the sparsity penalty term,
+andtheKLdistancerepresentsherediﬀerencevaluebetweenthe two vectors; it can be seen from the constraint functionexpressionthatthelargerthediﬀerencebetweenthemean ρ
+and the desired sparsity mean 􏽢ρ
+i, the larger the penalty,
+ensuringthatthissparsityhastheeﬀectofmaking 􏽢ρicloseto
+ρ, as it ensures sparse activation of the training data against
+any given node in the hidden layer, thereby reducing the
+dependency between features. *e output average of thehidden layer nodes is solved as follows:
+􏽢ρ
+i�1
+s􏽘s
+l�1al
+ix(l)􏼐 􏼑 􏽨 􏽩 . (4)
+Preprocessing 
+module
+Data base 
+module
+Raw data
+Feature library ResultsPredict Label and storeClassifier EvaluationClassification 
+moduleRetrainStatusLogSparse 
+AutoencoderAutoencoder 
+module
+Recovery Results
+Feedback 
+moduleFigure1: Proposed framework.
+Input Outputx1 x~
+1
+x~
+2
+x~
+3
+x~
+nx2
+x3
+xnama2a1
++1+1Encoder Decoder
+W
+WW
+W
+bW
+W
+W
+bFigure2: Training diagram of an SAE.SecurityandCommunicationNetworks 5
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Besides, we noticed that removing redundant features
+cannotblindlyreducethedimensionalityin[28];theauthors
+used AE to reduce the features to below 30; the accuracy ofthe model continued to decrease. Similarly in the literature[23], reducing the dimensionality to around 59, there weresigniﬁcantﬂuctuationsintheperformanceofeachclassiﬁer.
+In this paper, an SAE with two encoders and two decoders
+wasused,with79nodesintheinputlayer,equaltothetotalnumber of features in the dataset. *e ﬁrst hidden layer ofthe SAE reduces the dimensionality to 68 features and re-duces the features to 64 in the second hidden layer. Aftertraining the parameters, the ﬁnal model can perform theclassiﬁcation task at the ﬁnal stage. Algorithm 1 gives thepseudocode of the SAE training process.
+3.3. Classiﬁcation Algorithm. In the classiﬁcation module,
+we used RF as the main algorithm of the classiﬁcation
+module, and random forest is an ensemble method com-posed of decision trees. In the experimental stage, we alsoused decision tree (DT) for comparison experiments toverify the performance of RF.
+Random forests have several advantages: as the number
+of trees in the forest increases, the variance of the modeldecreases while the bias remains constant; resistance tooverﬁtting; the number of control and model parameters is
+small;andthereisnoneedtoselectfeaturesbecausetheycan
+use a large number of potential attributes.
+A DT is a tree structure (which can be binary or non-
+binary tree). Each of its nonleaf nodes represents a test on afeature attribute, each branch represents the output of thisfeatureattributeoncertainvaluedomain,andeachleafnodestores a category. *e process of making a decision using aDT involves starting from the root node, testing the cor-responding feature attribute in the item to be classiﬁed, andselecting the output branch according to its value until itreaches the leaf node, where the category stored in the leaf
+node is used as the decision result. Classiﬁcation and re-
+gression tree (CART) is chosen as the DTalgorithm for thisexperiment (see [29] for details of CART).
+CART is a binary tree, which uses the binary segmen-
+tationmethodtocutthedatainto twopartstoentertheleftsubtree and right subtree, respectively. And, each nonleafnode has two children, so CART has one more leaf nodesthan nonleaves. In CART classiﬁcation, the Gini index isusedtoselectthebestfeaturesfordatapartitioning,andGinidescribes purity, the smaller the value, the higher the purityand the better the features. We select the attribute that
+minimizes the Gini index after division in the candidate set
+as the optimal subattribute; each iteration in CARTreducesthe Gini coeﬃcient. For sample set D, the number is |D|.
+Supposethere are Kclassesand the k
+thclassis|C k|,thenthe
+Gini index expression for sample set Dis
+Gini(D) � 1−􏽘K
+k�1Ck􏼌􏼌􏼌􏼌􏼌􏼌􏼌􏼌
+|D|􏼠 􏼡 2
+. (5)
+Forsample D,thenumberis|D|,whichdivides Dinto
+|D1|,|D2|,. . ., |D n|nparts according to certain value a offeatureA;then,undertheconditionoffeatureA,theGini
+index expression for sample set Dis
+Gini(D, A) � 􏽘n
+i�1Di􏼌􏼌􏼌􏼌􏼌􏼌􏼌􏼌
+|D|Gini D
+i  􏼁 . (6)
+Algorithm 2 gives the basic process for CARTcreation,
+which involves following variable selection criteria and
+splittingcriteriatogrowthetreeuntilthestoppingcriteriaismet.
+Random forest works on the concept of fair elections
+because the result is based on the predictions of severalindependent DTs, and a group of DTs with the same pre-diction will outperform a single DT. For classiﬁcation, theprediction is the majority vote, and for regression, theprediction is the mean. It uses a random subset of a givendata set and a random subset of features to create an in-dividual DT so that the individual DT is barely correlated
+with each other, and the lower correlations between trees
+become more independent.
+For feature selection, the random forest technique as-
+signs weights to diﬀerent features based on the degree towhich a particular feature reduces the accuracy of the in-dividual DT classiﬁcation. *e fact that the dependentvariable has a low weight is due to the fact that the randomforest technique ensures that the correlations between in-dividual DT are small. Algorithm 3 gives the normal treestructured classiﬁer generation process.
+4.Experimental Results
+Classiﬁcation performance is a core function of IDS; in thissection, we focus on evaluating classiﬁcation performanceand the experimental validation of our proposed approach.WeﬁrstdescribedindetailtheCICIDS2017datasetusedforthe experiments and its corresponding preprocessing, gavethe metrics and the experimental environment used for theevaluation, and compared and analyzed the experimentalresults. Finally, we performed a simple test of the restorefunction of the framework.
+4.1. CICIDS2017 Dataset. Most current datasets are out-
+dated and unreliable (some commonly used for intrusion
+detection evaluation are KDD’99 [30] and KDD-NSL [31]);some of which lack the diversity and volume of traﬃc tocover a wide range of known attacks, while others ano-nymize packet payload data and do not reﬂect currenttrends.
+In order to best reﬂect the real traﬃc scenarios and
+updated attack methods in real networks, we chose thedataset CICIDS2017 [32], which contains the latest benigngeneric attack traﬃc representative of the real networkenvironment. *is dataset constructs the abstract behaviorof 25 users based on HTTP, HTTPS, FTP, SSH, and e-mailprotocols to simulate the real network environmentaccurately.
+*eCICIDS2017datasetwascollectedbasedonrealtraces
+of normal and malicious activity in the network traﬃc. *etotalnumberofrecordsinthedatasetis2,830,743.*enormal6 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+activity traﬃc contains 2,273,097 records (about 80.3% of the
+data) and malicious behavior traﬃc records 557,646 records(about 19.7% of the data). *e distribution of each tag set fortheentiredatasetisgiveninFigure3.*eCICIDS2017datasetisalabeleddatasetwith85featuresthatcontainclasslabels(lastcolumn) corresponding to the traﬃc state. *ese features arelisted in Table 1. *e CICIDS2017 dataset is one of the uniquedatasets containing the latest attacks, and we used this datasetto test and evaluate the ideas presented.4.2. Data Preprocessing. For the preprocessing of data, in
+addition to regular operations (such as handing values ornonnumber types, encoding labels, and so on), in theCICIDS2017dataset,somefeaturesmakethemodeladapttoa speciﬁc dataset after training, which aﬀects the general-ization ability of the model, so we removed the “Flow ID,”“Source IP,” “Source Port,” “Destination IP,” and “Time-stamp”featuresamongthem.*erefore,thetotalnumberoffeatures we use contains 79 features.Input: training dataset
+Output: trained SAE modelInitialization: W, b,λ,β,ρ
+Step 1: perform forward propagation on all input samplesStep 2: calculate the output of each node a in the hidden layer (equation (1))
+Step 3: calculate the output error of the cost function (equation (3))
+Step 4: updating the weights and biases of each layer using the backpropagation algorithm to reduce errors
+Step 5: repeat Step 2, 3, and 4 until the reconstruction error is minimum
+End
+ALGORITHM 1:*e training procedures of SAE.
+Input: training dataset D
+Output: CART
+N: threshold of the number of samples in node. n: number of samples in the node
+G: Gini index threshold for D
+Gini (D): Gini index of D
+Basedon D,startingfromtherootnode,if n<NorGini(D)<Gornomorefeatures,recursivelyperformthefollowingoperationson
+each node to construct a binary tree
+For each feature A, for each of its possible values a, the split will be into D1 andD2 based on whether the test for A�a, and use
+equation (6) to calculate Gini (D, A)
+Among all possible features Aand all its possible segmentation points a, the feature with the smallest Gini index and its
+corresponding segmentation point are selected as the optimal feature and the optimal segmentation pointGenerate two subnodes from the current node and assign the training dataset to the two subnodes according to the features
+Return CART
+ALGORITHM 2:CARTcreation process.
+Input: training dateset
+Output: tree structured classiﬁer
+S: number of training samples
+M: number of features. m: number of features input (m <<M)
+N: number of trees generatedIf the tree to be generated is less than N,
+Step 1: from the Straining samples, take samples Stimes in a way with a put-back sampling to form a training set
+Step 2: use unselected samples to make predictions and evaluate their errors
+Step 3: for each node, mfeatures are randomly selected
+Step 4: according to these mfeatures, calculate the best split method
+Step 5: grow to be largest extent possible without pruning
+Return tree structured classiﬁer
+ALGORITHM 3:*e tree classiﬁer generation process.SecurityandCommunicationNetworks 7
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Severalfeaturesinthedatasethaveawiderangebetween
+the maximum value and minimum value, such as “Flow
+Duration,” “Fwd IAT Total,” “Idle Mean,” and other fea-tures. *ese feature values are not suitable for processing.*erefore, we normalized these features by using equation(7) to map all feature values to the range [0, 1].
+x
+i�xi−xmin
+xi−xmax, (7)
+wherexidenotes the value of a certain feature and xminand
+xmaxrepresent the minimum and maximum values of this
+feature.
+Benign
+Port scanDos goldeneye
+SSH patatorDos slow HTTP test
+Web attack-brute force
+Infiltration
+HeartbleedDos hulk
+DDos
+FTP patator
+Dos slow lorisBotnetWeb attack-XSS
+Web attack-SQL injection11
+213665215071966549957965897793810293 2273097 557646
+231073158930
+128027Figure3: Distribution of labels in the CICIDS2017 dataset.
+Table1: Features of each network traﬃc in CICIDS2017.
+No. Feature
+1 Flow ID
+2 Source IP
+3 Source port
+4 Destination IP
+5 Destination port
+6 Protocol
+7 Timestamp
+8 Flow duration
+9 Total fwd packets
+10 Total backward packets
+11 Total length of fwd packets
+12 Total length of bwd packets
+13 Fwd packet length max
+14 Fwd packet length min
+15 Fwd packet length mean
+16 Fwd packet length std
+17 Bwd packet length max
+18 Bwd packet length min
+19 Bwd packet length mean
+20 Bwd packet length std
+21 Flow bytes/s
+22 Flow packets/s
+23 Flow IATmean
+24 Flow IATstd
+25 Flow IATmax
+26 Flow IATmin
+27 Fwd IAT total
+28 Fwd IATmean
+29 Fwd IATstd
+30 Fwd IATmax
+31 Fwd IATmin
+32 Bwd IAT total
+33 Bwd IATmean
+34 Bwd IATstd
+35 Bwd IATmax
+36 Bwd IATmin
+37 Fwd PSH ﬂags
+38 Bwd PSH ﬂags
+39 Fwd URG ﬂags
+40 Bwd URG ﬂagsTable1: Continued.
+No. Feature
+41 Fwd header length
+42 Bwd header length
+43 Fwd packets/s
+44 Bwd packets/s
+45 Min packet length
+46 Max packet length
+47 Packet length mean
+48 Packet length std
+49 Packet length variance
+50 FIN ﬂag count
+51 SYN ﬂag count
+52 RST ﬂag count
+53 PSH ﬂag count
+54 ACK ﬂag count
+55 URG ﬂag count
+56 CWE ﬂag count
+57 ECE ﬂag count
+58 Down/up ratio
+59 Average packet size
+60 Avg fwd segment size
+61 Avg bwd segment size
+62 Fwd header length
+63 Fwd avg bytes/bulk
+64 Fwd avg Packets/bulk
+65 Fwd avg bulk rate
+66 Bwd avg bytes/bulk
+67 Bwd avg Packets/bulk
+68 Bwd avg bulk rate
+69 Subﬂow fwd packets
+70 Subﬂow fwd bytes
+71 Subﬂow bwd packets
+72 Subﬂow bwd bytes
+73 Init_Win_bytes_forward
+74 Init_Win_bytes_backward
+75 act_data_pkt_fwd
+76 min_seg_size_forward
+77 Active mean
+78 Active std
+79 Active max
+80 Active min
+81 Idle mean
+82 Idle std
+83 Idle max
+84 Idle min
+85 Label8 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+In this study, the dataset was divided into training and
+testing sets in the ratio of 7:3.
+4.3. Evaluation Metrics. *e detection module as the main
+function of the framework needs to evaluate the perfor-
+manceoftheframeworkaccurately;weusedfourmetricstoevaluate the performance of the classiﬁcation module: ac-curacy, recall, preference, and F1-score, which are widelyused to evaluate the performance of intrusion detectiontechniques. *eir formulas are as follows.
+Accuracy (Acc): it is deﬁned as the ratio of correctly
+classiﬁed samples to the total number of samples, which
+represents the overall performance of the model.
+Acc�
+TP+TN
+TP+TN+FP+FN. (8)
+Recall (Re) or detection rate (DR): it is deﬁned as the
+ratio of the number of samples correctly classiﬁed into a
+certain class to the actual number of samples of this class.
+Re�DR�TP
+TP+FN. (9)
+Precision (Pr): it is deﬁnedas the ratioof the numberof
+samples correctly identiﬁed as a category to the number ofsamples identiﬁed as such.
+Pr�TP
+TP+FP. (10)
+F1-score (F1) or F-measure (FM): it is deﬁned as the
+harmonic mean of Precision and Recall.
+F1�FM�2·Pr·Re
+Pr+Re. (11)
+All these evaluation metrics are derived from the four
+valuesfoundintheconfusionmatrix(Table2),andforeachtype of sample, TP is the number of samples correctlyclassiﬁedasthattype,TNisthenumberofsamplescorrectlyclassiﬁed as not that type, FP is the number of samples
+misclassiﬁed as that type, and FN is the number of samples
+misclassiﬁed as not that type.
+4.4. Experimental Environment. *e details of all experi-
+mentalimplementationconﬁgurationsareshowninTable3.4.5.ResultsandDiscussion. Our experiment was conducted
+to investigate the performance of our proposed framework
+in bothbinary and multiclass classiﬁcation and toverify theeﬀectiveness of the low-dimensional features extracted byour method using the CICIDS2017 dataset. Moreover, wecalculated training and testing times to evaluate the validityof our model. Figures 4 and 5 show the performance of thealgorithm using diﬀerent parameters (here, we consider DTas a tree RF model) on the values of the four evaluationmetricsinbinaryandmulticlassclassiﬁcation.Tables4and5give the training and testing times of the algorithms withdiﬀerent parameters in binary and multiclass classiﬁcation.From these ﬁgures and tables, we can see that diﬀerentparameteralgorithms(exceptDT)havesubtlediﬀerencesinperformanceagainstdiﬀerentattacks;however,therearebigdiﬀerences in the training and testing time of RF, especially
+for RF-50 trees and RF-100 trees, where the training and
+testingtimeisalmostdoubled.Abetteralgorithmcandetectmore attacks in shorter time and more adapt tothe modernInternet; we choose the appropriate algorithm based on theevaluation metrics and time; RF-10 trees are undoubtedlythe most suitable classiﬁer.
+Tables 6 and 7 provide a detailed summary of the
+proposedframeworkintermsofAccuracy,Precision,Recall,and F1-score, respectively. Table 6 describes the detailedresults for binary classiﬁcations (Bengin and Abnormal),and Figure 6 is the corresponding confusion matrix, where681,564 samples were correctly identiﬁed as benign traﬃc
+and 167,012 samples were correctly identiﬁed as abnormal
+traﬃc. Table 7 gives the results of the evaluation of varioustypes of traﬃc, showing that our approach can identify 15diﬀerent types of attacks; Figure 7 illustrates the corre-sponding confusion matrix, and checking the confusionmatrixshowsthediﬀerence.Althoughthewrongcategoryisdetected, the traﬃc that is still classiﬁed as an attack isgreater than the traﬃc that is classiﬁed as benign. AttacksampleslikeInﬁtration,Heardtbleed,andSqlInjectionhavetoo few records than other attack samples, but all of themwere identiﬁed.
+We also validated the superiority of our model by
+comparing its performance with the classiﬁcation ap-proaches used in related research. Tables 8 and 9 present acomparison of the proposed framework with related workandsometraditionalMLmethodsmentionedintheirpaper.Table 8 focuses on the comparison between the two clas-siﬁcation results of the related work, while Table 9 is acomparison between the related work using multiclassclassiﬁcation results.Our proposed framework outperformspreviousstudiesintermsofAccuracy,Precision,Recall,andF1-score.
+4.6. Additional Test for Restore Function. We used the
+compressed traﬃc in the database and restored it to the
+original traﬃc using SAE. Compared with the classiﬁcationresultsoftheoriginaltraﬃc,weobtained91.83%accuracyinbinary classiﬁcation and 91.65% accuracy in the multiclassclassiﬁcation.Table2: Confusion martrix.
+Predicted class
+Malicious Benign
+Actual classMalicious True positive (TP) False negative (FN)
+Benign False positive (FP) True negative (TN)SecurityandCommunicationNetworks 9
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Table3: Experimental environment.
+Software/hardware Details
+OS Windows 10
+CPU Intel (R) Core (TM) i5-4200H CPU @ 2.80Hz
+RAM 8GB
+Anaconda 4.8.3
+Python 3.7.3
+Keras 2.2.4
+0.99885 0.9989 0.99895 0.999 0.99905 0.9991 0.99915 0.9992 0.99925 0.9993RF-10 treesRF-20 treesRF-50 treeseRF-100 trees
+DT
+0.99924
+0.99924
+0.99924
+0.999240.99902
+0.99902
+0.99902
+0.999020.999270.999280.999280.999280.999280.999280.999280.999280.99928
+0.99927
+0.999270.99927
+F1-score
+RecallPrecision
+Accuracy
+Figure4: Performance of the algorithm for the values of the four metrics using diﬀerent parameters in binary classiﬁcation.
+RF-10 treesRF-20 treesRF-50 treeseRF-100 trees
+DT
+0.9984 0.9985 0.9986 0.9987 0.9988 0.9989 0.999 0.99910.998980.99898
+0.998940.998930.99893
+0.998650.998650.99865
+0.998680.998990.99899
+0.998940.998980.998980.999020.998970.999030.998990.999030.99896
+F1-score
+RecallPrecisionAccuracy
+Figure5: Performance of the algorithm for the values of the four metrics using diﬀerent parameters in multiclass classiﬁcation.10 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+5.Discuss the Application of IDS to Edge/
+Fog Networks
+*e development of technology and realistic demands has
+extended the cloud computing paradigm to the edge of thenetwork, thus realizing various new applications and ser-vices,whilefacingsecurityandprivacyissues.Althoughourresearch has successfully demonstrated the eﬀectiveness oftheframeworkandthetechnologyhasledtobetterresultsinseveral evaluation metrics of IDS as well as in classiﬁcationspeed, IDS also needs to adapt to the new network archi-tecture [33]. IDS is rapidly developing towards edge/fognetworks, and the most likely application of this genericintrusion detection framework we have developed to edgenetworks is to split some of these modules, removing thedatabase module and the feedback module and embeddingthe rest in edge devices. Using only binary classiﬁcation,from our experimental results, where the trained model inour experimental environment was able to process 849,223
+traﬃc within 25 seconds (time for feature extraction and
+classiﬁcation),themaindrawbackcomparedwiththeuseoffeature extraction methods in the literature [34] is thatdimensionality reduction is not considered. By deployingthe complete framework in the cloud, the restore functionserves to some extent to check for duplicate data comingfrom multiple devices. *e cloud completes the retrainingTable4: Training and testing time for diﬀerent parameters of the algorithm in binary classiﬁcation.
+Method Training time (sec) Testing time (sec)
+RF-10 trees 246.689 1.696
+DT 420.419 0.364
+RF-20 trees 502.758 2.734
+RF-50 trees 1266.263 6.465
+RF-100 trees 2546.473 13.109
+Table5: Training and testing time for diﬀerent parameters of the algorithm in multiclass classiﬁcation.
+Method Training time (sec) Testing time (sec)
+RF-10 trees 291.551 3.138
+DT 386.454 0.387
+RF-20 trees 502.952 4.434
+RF-50 trees 1209.425 10.573
+RF-100 trees 2425.976 20.507
+Table6: Evaluation results for various types of traﬃc under binary classiﬁcation.
+Accuracy: 0.9992
+Precision Recall F1-score
+Bengin 0.9996 0.9994 0.9995
+Abnormal 0.9978 0.9983 0.9981
+Weighted avg 0.9992 0.9992 0.9992
+Table7: Evaluation results for various types of traﬃc under multiclass classiﬁcation.
+Accuracy: 0.9990
+Precision Recall F1-score
+Bengin 0.9996 0.9995 0.9995
+Bot 0.9142 0.8492 0.8805
+DDos 0.9999 0.9997 0.9998
+Dos goldeneye 0.9984 0.9793 0.9887
+Dos hulk 0.9963 0.9993 0.9978
+Dos slow http test 0.9963 0.9891 0.9927
+Dos slow loris 0.9960 0.9908 0.9934
+FTP-Patator 1.0000 0.9983 0.9992
+Heartbleed 1.0000 0.3333 0.5000
+Inﬁltration 1.0000 0.2727 0.4286
+PortScan 0.9997 0.9999 0.9998
+SSH-patator 0.9943 0.9853 0.9898
+Web attack-brute force 0.6808 0.8872 0.7704
+Web attack-sql injection 1.0000 0.1667 0.2857
+Web attack-XSS 0.4655 0.1378 0.2126
+Weighted avg 0.9989 0.9990 0.9989SecurityandCommunicationNetworks 11
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+with data from its own database and data transmitted from
+the Edge IDS and updates the parameters downwards. Edge
+IDS is independent of each other; by continuously learningnew parameters from Cloud IDS, Edge IDS can update andupgrade their detection rules as the network security statuschanges, avoiding conﬂicts between Edge IDSs. Comparedwith [35], we use 14 diﬀerent attack samples to validate ourmethod; interms of algorithm,there are someuncertaintiesin the gene immune detection algorithm; we use the more
+matureRFalgorithmforclassiﬁcation;theRFalgorithmand
+its improved algorithms are widely used in intrusion de-tectionandshowedgoodperformance[36].However,itstillhas certain limitations and challenges [37], such as multi-source data, false alarm response, and so on. Indeed, edgecomputing brings beneﬁts and also poses challenges for thedesign of new IDS.
+Benign
+BenignAbnormal
+AbnormalPredicted class
+Actual class365 167012681564 282
+100000200000300000400000500000600000
+Figure6: Confusion matrix of binary classiﬁcation.
+4000000000000 0 0000000000000000000000000000000 000000000000000000000000001000000
+1743000000000 47673 00 0001122835
+000000030000000001000000000 2377 00000 0 0 0 6 1723 000000 0 0 0 1632 5000000 1 27 69272 10000000 1 3024 000000000 38395 0000000005 0 1 0000000000
+00
+0 27 273391347
+1401 2 153681585 89 11 37 50 11 11 3 2 8 6 26 24 3 15
+XSS
+XSSSql injection
+Sql injectionBrute force
+Brute forceSSH-patator
+SSH-patatorPortscan
+PortscanInfiltration
+InfiltrationHeartbleed
+HeartbleedFTP-patator
+Ftp-patatorSlowloris
+SlowlorisSlowhttptest
+SlowhttptestPredicted classHulk
+HulkGoldeneye
+GoldeneyeDDoS
+DDoSBot
+BotBenign
+Benign100000200000300000400000500000600000
+0
+Actual class
+Figure7: Confusion matrix of multiclass classiﬁcation.12 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+6.Conclusion and Future Work
+Anovelframeworkofintrusiondetectionwasproposedand
+discussed, which is comprised of ﬁve modules: pre-processing module, autoencoder module, database module,classiﬁcation module, and feedback module. *e pre-processeddatawerecompressedbytheSAEmodeloftheAEmodule to obtain a lower-dimensional reconstruction fea-ture, and the classiﬁcation result was obtained through theclassiﬁcationmodule.*ecompressedfeaturesofeachtraﬃc
+were stored in the database of the database module; this
+library can provide retraining and testing for the classiﬁ-cation module and can also restore these features to theoriginal traﬃc for postevent analysis and forensics. *eperformanceofframeworkproposedwasevaluatedwiththe
+CICIDS2017 dataset to simulate the real traﬃc of the net-
+work. *e proposed framework, shown by experiment re-sult, provided higher accuracy than other similar work andtraditional ML methods, especially in the case of multiclassclassiﬁcations. In the upcoming time, eﬀort will be made toimprove the two functions, the restore function andretraining function, turning retraining function into adap-tive update so as to reduce manual intervention, whereasgettingtraceableeﬀectinrestorefunction.Furthermore,thisresearch will serve as the basis for further research andinvestigation to enable the development of eﬀective IDSs
+thatcanbe usedinacomplexnetwork (e.g.,edgenetworks)
+environment.Table8: Comparison of the proposed framework in the binary classiﬁcation with related work using CICIDS2017 dataset evaluation and
+some of the traditional ML approaches mentioned in their papers.
+Reference+method Accuracy Precision Recall F1-score
+[8]MDAE+LSTM 0.9990 0.9990 0.9980 0.9990
+Naive Bayes 0.3130 0.3000 0.9790 0.4590
+SVM 0.7990 0.9920 0.3280 0.4930
+DNN 0.9310 0.8270 0.9740 0.9840
+MDAE 0.9140 0.8980 0.8020 0.8400
+LSTM 0.9980 0.9990 0.9970 0.9980
+[24] DNN+without IPs 0.9677
+[18] Feature selection+ID3 0.9515 0.9500 0.9500 0.9500
+[23] PCA+RF 0.9960 0.9880 0.9970
+AE+RF 0.9950 0.9850 0.9960
+Our approach 0.9992 0.9992 0.9992 0.9992
+Note. *e best values are in bold, and missing value means not provided in reference.
+Table9:ComparisonoftheproposedframeworkinthemulticlassclassiﬁcationwithrelatedworkusingCICIDS2017datasetevaluationand
+some of the traditional ML approaches mentioned in their papers.
+Reference+method Accuracy Precision Recall F1-score Remark
+[8]MDAE+LSTM 0.9860 0.9860 0.9960 0.9860
+8 classiﬁcationNaive Bayes 0.2500 0.7670 0.2500 0.1880
+SVM 0.7990 0.7570 0.7990 0.7230
+DNN 0.9480 0.9650 0.9480 0.9530
+MDAE 0.9040 0.9920 0.9000 0.9110
+LSTM 0.9700 0.9680 0.9860 0.9730
+[17]DT+rule-based 0.9967 0.9448
+15 classiﬁcationRF 0.9559 0.9305
+REP tree 0.9340 0.9164
+Multilayer Perceptron 0.8524 0.7783
+Naive Bayes 0.7453 0.8251
+Jrip 0.9447 0.9340
+J48 0.9348 0.9199
+[13] DBN-SVM 0.9774 0.9768 0.9768 Use only Tuesday’s dataset with 5 classiﬁcation
+[9]CNN+LSTM 0.9867 0.9721 0.9332
+7 classiﬁcation CNN 0.9844 0.9646 0.9311
+LSTM 0.9683 0.9421 0.9097
+[23]PCA+RF 0.9880 0.9890 0.9880 0.988015 classiﬁcationAE+RF 0.9950 0.9950
+Our approach 0.9990 0.9990 0.9989 0.9989 15 classiﬁcation
+Note. *e best values are in bold, and missing value means not provided in reference.SecurityandCommunicationNetworks 13
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+Data Availability
+*eCICIDS2017datasetusedtosupporttheﬁndingsofthis
+study can be downloaded from https://www.unb.ca/cic/
+datasets/ids-2017.html.
+Conflicts of Interest
+*e authors declare that they have no conﬂicts of interestregarding the publication of this paper.
+Acknowledgments
+*isworkwassupportedbytheGuizhouProvinceProjectofInnovation Talents Teams of Electrostatic and Electro-
+magnetic Protection (no. [2017]5653) and Academician LiuShanghe Fund of Electrostatic Protection Research (no.BOIMTLSHJD20161004).
+References
+[1] A. Buczak and E. Guven, “A survey of data mining and
+machine learning methods for cyber security intrusion de-
+tection,”IEEE Communications Surveys & Tutorials, vol. 18,
+no. 2, pp. 1153–1176, 2017.
+[2] N. Farnaaz and M. A. Jabbar, “Random forest modeling for
+network intrusion detection system,” Procedia Computer
+Science, vol. 89, pp. 213–217, 2016.
+[3] H. Wang, J. Gu, and S. Wang, “An eﬀective intrusion de-
+tection framework based on SVM with feature augmenta-
+tion,”Knowledge-Based Systems, vol. 136, pp. 130–139, 2017.
+[4] P. S. Bhattacharjee, A. K. M. Fujail, and S. A. Begum, “A
+comparison of intrusion detection by K-means and fuzzy
+C-meansclusteringalgorithmovertheNSL-KDDdataset,”in
+Proceedings of the 2017 IEEE International Conference on
+ComputationalIntelligence andComputingResearch (ICCIC),
+IEEE, Chennai, India, 2017.
+[5] I. M. Akashdeep, I. Manzoor, and N. Kumar, “A feature
+reduced intrusion detection system using ann classiﬁer,”
+Expert Systems with Applications, vol. 88, pp. 249–257, 2017.
+[6] Y. Chuan-Long, Z. Yue-Fei, F. Jin-Long et al., “A deep
+learning approach for intrusion detection using recurrentneural networks,” IEEE Access, vol. 5, pp. 21954–21961, 2017.
+[7] M. Lopez-Martin, B. Carro, and A. Sanchez-Esguevillas,
+“Application of deep reinforcement learning to intrusion
+detection for supervised problems,” Expert Systems with
+Applications, vol. 141, Article ID 112963, 2019.
+[8] H. He, X. Sun, H. He, G. Zhao, L. He, and J. Ren, “A novel
+multimodal-sequential approach based on multi-view fea-tures for network intrusion detection,” IEEE Access, vol. 7,
+pp. 183207–183221, 2019.
+[9] P. Sun, P. Liu, Q. Li et al., “DL-IDS: extracting features using
+CNN-LSTM hybrid network for intrusion detection system,”Security and Communication Networks, vol. 2020, Article ID
+8890306, 11 pages, 2020.
+[10] R. M. Elbasiony, E. A. Sallam, T. E. Eltobely, and
+M. M. Fahmy, “A hybrid network intrusion detection
+framework based on random forests and weighted k-means,”
+Ain Shams Engineering Journal, vol. 4, no. 4, pp. 753–762,
+2013.
+[11] W.Wang,T.Guyet,R.Quiniou,M.-O.Cordier,F.Masseglia,
+and X. Zhang, “Autonomic intrusion detection: adaptively
+detecting anomalies over unlabeled audit data streams incomputer networks,” Knowledge-Based Systems, vol. 70,
+pp. 103–117, 2014.
+[12] H. Yao, Q. Wang, L. Wang, P. Zhang, M. Li, and Y. Liu, “An
+intrusion detection framework based on hybrid multi-level
+data mining,” International Journal of Parallel Programming,
+vol. 47, no. 4, pp. 740–758, 2019.
+[13] H.Zhang,Y.Li,Z.Lv,A.K.Sangaiah,andT.Huang,“Areal-
+time and ubiquitous network attack detection based on deep
+belief network and support vector machine,” IEEE/CAA
+JournalofAutomaticaSinica,vol.7,no.3,pp.790–799,2020.
+[14] E. Min, J. Long, Q. Liu et al., “Su-IDS: a semi-supervised and
+unsupervised frameworkfor networkintrusion detection,” in
+Proceedings of the International Conference on Cloud Com-
+puting and Security, pp. 322–334, Springer, Cham, Switzer-land, 2018.
+[15] M. R. Karbir, R. Onik, and T. Samad, “A network intrusion
+detection framework based on bayesian network usingwrapper approach,” International Journal of Computer Ap-
+plications, vol. 166, no. 4, pp. 975–8887, 2017.
+[16] J.Gu,L.Wang,H.Wang,andS.Wang,“Anovelapproachto
+intrusion detection using SVM ensemble with feature aug-
+mentation,” Computers & Security, vol. 86, pp. 53–62, 2019.
+[17] A. Ahmim, L. Maglaras, M. A. Ferrag et al., “A novel hier-
+archicalintrusiondetectionsystembasedondecisiontreeand
+rules-based models,” in 15th International Conference on
+Distributed Computing in Sensor Systems (DCOSS), pp. 228–
+223, IEEE, Santorini, Greece, 2019.
+[18] V. Kumar, V. Choudhary, V. Sahrawat et al., “Detecting
+intrusions and attacks in the network traﬃc using anomalybasedtechniques,”in Proceedingsofthe20205thInternational
+Conference on Communication and Electronics Systems
+(ICCES), pp. 554–560, IEEE, Coimbatore, India, 2020.
+[19] A. S. Qureshi, A. Khan, N. Shamim, and M. H. Durad,
+“Intrusiondetectionusingdeepsparseauto-encoderandself-taughtlearning,” NeuralComputingandApplications,vol.32,
+no. 8, pp. 3135–3147, 2020.
+[20] S. Nathan, T. N. Ngoc, V. D. Phai et al., “A deep learning
+approach to network intrusion detection,” IEEE Transactions
+onEmergingTopicsinComputationalIntelligence,vol.2,no.1,pp. 41–50, 2018.
+[21] A. Y. Javaid, Q. Niyaz, W. Sun et al., “A deep learning ap-
+proach for network intrusion detection system,” in Pro-
+ceedings of the 9th Eai International Conference on Bio-
+inspired Information & Communications Technologies, ICST
+(Institute for Computer Sciences, Social-Informatics andTelecommunications Engineering), pp. 21–26, Nairobi, Kenya,
+2016.
+[22] M. Al-Qatf, Y. Lasheng, M. Al-Habib, and K. Al-Sabahi,
+“Deeplearningapproachcombiningsparseautoencoderwith
+svm for network intrusion detection,” IEEE Access, vol. 6,
+pp. 52843–52856, 2018.
+[23] R. Abdulhammed, H. Musafer, A. Alessa et al., “Features
+dimensionality reduction approaches for machine learningbased network intrusion detection,” Electronics, vol. 8, no. 3,
+2019.
+[24] G. C. Fern ´andez and S. Xu, “A case study on using deep
+learning for network intrusion detection,” in Proceedings of
+the MILCOM 2019-2019 IEEE Military CommunicationsConference (MILCOM), pp. 1–6, IEEE, Norfolk, VA, USA,2019.
+[25] C. Yin, Y. Zhu, S. Liu, J. Fei, and H. Zhang, “Enhancing
+network intrusion detection classiﬁers using supervised
+adversarial training,” Fe Journal of Supercomputing, vol. 76,
+no. 9, pp. 6690–6719, 2020.14 SecurityandCommunicationNetworks
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+
+[26] P.Madani andN.Vlajic, “Robustnessofdeepautoencoderin
+intrusion detection under adversarial contamination,” in
+Proceedings of the 5th Annual Symposium and Bootcamp,
+pp. 1–8, ACM, New York, NY, USA, 2018.
+[27] E. Clevert, T. Unterthiner, and S. Hochreiter, “Fast and ac-
+curate deep network learning by exponential linear uni-
+ts(elus),” 2016, https://arxiv.org/abs/1511.07289.
+[28] S. Ustebay, Z. Turgut, and M. A. Aydin, “Cyber attack de-
+tection by using neural network approaches: shallow neural
+network, deep neural network and autoencoder,” in Pro-
+ceedings of the 2019 International Conference on Computer
+Networks, pp. 144–155, Spinger, Cham, Switzerland, 2019.
+[29] L. Breiman, J. Friedman, J. Charles et al., Classiﬁcation and
+RegressionTrees,ChapmanandHall/CRC,London,UK,1984.
+[30] KDDCup1999: http://kdd.ics.uci.edu/databases/kddcup99/
+kddcup99.html.
+[31] M. Tavallaee, E. Bagheri, W. Lu et al., “A detailed Analysis of
+the KDD CUP 99 data set,” in Proceedings of the 2009 IEEE
+Symposium on Computational Intelligence for Security andDefense Applications, pp. 1–6, IEEE, Ottawa, Canada, 2009.
+[32] I.SharafaldinandA.Ali,“Ghorbanitowardgeneratinganew
+intrusion detection dataset and intrusion traﬃc character-
+ization,”in Proceedingsofthe4thInternationalConferenceon
+Information Systems Security and Privacy (ICISSP), pp. 108–116, Funchal, Portugal, 2018.
+[33] M. Patel, B. Naughton, C. Chan et al., “Mobile-edge com-
+puting introductory technical white paper: mobile-edge
+computing(MEC) industry initiative,” 2014.
+[34] M.Eskandari,Z.H.Janjua,M.Vecchioetal.,“PassbanIDS:an
+intelligent anomaly-based intrusion detection system for IoT
+Edge devices,” IEEE Internet of Fings Journal, vol. 7, no. 8,
+pp. 6882–6897, 2020.
+[35] Y. Zhang, W. Jia, and K. Wang, “An edge IDS based on
+biological immune principles for dynamic threat detection,”Wireless Communications and Mobile Computing, vol. 2020,
+Article ID 8811035, 15 pages, 2020.
+[36] P.A.A.ResendeandA.C.Drummond,“Asurveyofrandom
+forest based Methods for intrusion detection systems,” ACM
+Computing Surveys, vol. 51, no. 3, pp. 1–36, 2018.
+[37] S.Raponi, M.Caprolu,and R.DiPietro, “Intrusiondetection
+at the network edge: solutions, limitations, and future di-rections,” in Proceedings of the International Conference on
+Edge Computing, Springer, Rome, Italy, 2019.SecurityandCommunicationNetworks 15
+ 2037, 2021, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1155/2021/6610675 by The Registrar, Wiley Online Library on [21/11/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
+

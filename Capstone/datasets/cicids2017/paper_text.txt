@@ -1,0 +1,1 @@
+Download CICIDS2017 dataset from this link - https://www.kaggle.com/datasets/ericanacletoribeiro/cicids2017-cleaned-and-preprocessed
